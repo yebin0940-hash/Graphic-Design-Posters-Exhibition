@@ -4,19 +4,21 @@
  */
 
 import { Poster, ThemeSettings, NewsletterSubscriber } from './types';
+// @ts-ignore
+import bestePlakateImg from './assets/images/beste_plakate_poster_1781442387473.jpg';
 
 export const INITIAL_POSTERS: Poster[] = [
   {
     id: 'poster-1',
-    title: '네오 바우하우스 연구 4호',
-    artist: '루카스 반더버그 (Lukas Vanderburg)',
-    year: '2025',
-    category: '기하학적 구성주의',
-    medium: '실크스크린 프린트',
-    dimensions: '70 × 100 cm (B1 규격)',
-    imageUrl: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80',
-    colorPreset: 'lavender',
-    description: '순수한 기하학적 형태와 구조적 균형을 탐구하며, 은은한 라벤더와 크림색 조화를 활용한 작품입니다. 데사우 연구소의 여름 레지던시 기간 동안 시각적 질감을 실험하기 위해 탄생했습니다.'
+    title: '100 Best Posters (100 Beste Plakate 26)',
+    artist: '100 Beste Plakate e.V.',
+    year: '2026',
+    category: '스위스 에디토리얼 타이포그래피',
+    medium: '실크스크린 및 실판종 인쇄 / 무산성(Acid-Free) 수입지',
+    dimensions: '70 × 100 cm',
+    imageUrl: bestePlakateImg,
+    colorPreset: 'slate',
+    description: '독일, 오스트리아, 스위스의 가장 뛰어난 현대 포스터 디자인 100점을 선정하여 전시하는 연차 어워드 기획전의 실규모 템플릿입니다. 우아한 대칭 해체, 역동적인 세로 기립 타이포 및 다채로운 파스텔 도형 배치가 정수입니다.'
   },
   {
     id: 'poster-2',
@@ -226,11 +228,19 @@ export function getStoredPosters(): Poster[] {
     const data = localStorage.getItem('exhibition_posters');
     if (data) {
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length < 10) {
-        localStorage.setItem('exhibition_posters', JSON.stringify(INITIAL_POSTERS));
-        return INITIAL_POSTERS;
+      if (Array.isArray(parsed)) {
+        if (parsed.length < 10) {
+          localStorage.setItem('exhibition_posters', JSON.stringify(INITIAL_POSTERS));
+          return INITIAL_POSTERS;
+        }
+        // Auto-update cached poster-1 if it holds old Unsplash data or old title
+        const p1 = parsed.find(p => p.id === 'poster-1');
+        if (p1 && (p1.title === '네오 바우하우스 연구 4호' || p1.imageUrl.includes('unsplash.com'))) {
+          parsed[0] = { ...INITIAL_POSTERS[0] };
+          localStorage.setItem('exhibition_posters', JSON.stringify(parsed));
+        }
+        return parsed;
       }
-      return parsed;
     }
     return INITIAL_POSTERS;
   } catch (e) {

@@ -260,9 +260,6 @@ export default function App() {
           >
             {/* Start spacer banner block to frame the entrance */}
             <div className="flex-shrink-0 flex flex-col justify-center w-[280px] snap-start pr-4 select-none">
-              <span className={`font-mono text-[10px] tracking-[0.25em] uppercase block mb-1 ${activeColorPreset.accentText}`}>
-                A 섹션 // 연출 공간
-              </span>
               <h2 className={`${headerFontClass} text-2xl font-light leading-snug uppercase`}>
                 GRAPHIC DESIGN<br />POSTERS EXHIBITION
               </h2>
@@ -321,7 +318,7 @@ export default function App() {
 
               <div className="mt-8 pt-6 border-t border-neutral-200/50 dark:border-zinc-850">
                 <span className="font-mono text-[10px] text-zinc-450 block uppercase mb-1">주관 대관처</span>
-                <span className="font-sans text-xs font-semibold text-zinc-800 dark:text-zinc-200">크로이츠베르크 현대 미술 디지털관</span>
+                <span className="font-sans text-xs font-semibold text-zinc-800 dark:text-zinc-200">한동대학교 콘텐츠융합디자인학부</span>
               </div>
             </div>
 

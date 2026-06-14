@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Save, X, Sparkles, Check, Image as ImageIcon, Users, BookOpen, Layers } from 'lucide-react';
+import { Plus, Edit3, Trash2, Save, X, Sparkles, Check, Image as ImageIcon, Users, BookOpen, Layers, Upload } from 'lucide-react';
 import { Poster, ThemeSettings, ColorPalette, NewsletterSubscriber } from '../types';
 import { getStoredSubscribers } from '../data';
 
@@ -123,6 +123,33 @@ export default function AdminDashboard({
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setFormError('이미지 파일(*.jpg, *.png, *.webp, *.jpeg 등)만 업로드할 수 있습니다.');
+        return;
+      }
+      // Check file size, warning if too large to avoid localStorage limits
+      if (file.size > 3 * 1024 * 1024) {
+        setFormError('웹 브라우저 임시 저장 용량 제한으로 인해 이미지 파일의 크기는 3MB 이하여야 합니다.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setFormData(prev => ({
+            ...prev,
+            imageUrl: event.target!.result as string
+          }));
+          setFormError('');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const selectStockArt = (url: string) => {
@@ -355,22 +382,50 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
-                {/* IMAGE MANIPULATION ENGINE */}
+                {/* IMAGE FILE UPLOAD ENGINE */}
                 <div>
-                  <label className="text-[9px] font-mono text-[#a0a0a0] uppercase block mb-1">포스터 해상도 캔버스 이미지 URL*</label>
-                  <input
-                    type="text"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleInputChange}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full text-xs font-mono p-2.5 rounded border border-neutral-200 dark:border-zinc-700 bg-transparent outline-none"
-                  />
+                  <label className="text-[9px] font-mono text-[#a0a0a0] uppercase block mb-1">포스터 이미지 등록 (파일 선택)*</label>
+                  
+                  <div className="relative group/upload border border-dashed border-neutral-300 dark:border-zinc-700 hover:border-indigo-500 hover:bg-neutral-50/50 dark:hover:bg-zinc-850/50 transition-all rounded p-4 flex flex-col items-center justify-center text-center cursor-pointer min-h-[110px]">
+                    <input
+                      type="file"
+                      id="poster-file-upload"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    
+                    {formData.imageUrl ? (
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className="w-14 h-16 bg-neutral-100 dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 rounded overflow-hidden flex-shrink-0 relative">
+                          <img 
+                            src={formData.imageUrl} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        <div className="text-left flex-1 min-w-0">
+                          <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 block font-mono">✓ 이미지 장착 완료</span>
+                          <span className="text-[9px] text-zinc-500 dark:text-zinc-400 font-mono truncate block max-w-full">
+                            {formData.imageUrl.startsWith('data:') ? '업로드된 로컬 이미지 (Base64)' : '프리셋 템플릿 연동'}
+                          </span>
+                          <span className="text-[9px] text-zinc-450 dark:text-zinc-500 block mt-0.5 hover:underline text-indigo-500">다른 이미지 파일 선택하려면 클릭하세요</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 text-zinc-400 group-hover/upload:text-indigo-500 transition-colors mb-1.5" />
+                        <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 block">이미지 파일 마우스로 끌어넣거나 클릭</span>
+                        <span className="text-[9px] text-zinc-450 block mt-0.5">JPG, PNG, WEBP (로그 저장 최적 3MB 이하 권장)</span>
+                      </>
+                    )}
+                  </div>
                   
                   {/* Stock Graphic Presets Grid */}
-                  <div className="mt-2">
-                    <span className="text-[9px] font-mono text-zinc-450 block mb-1">
-                      미술관 엄선 디자인 가이드 템플릿 (선택 권장):
+                  <div className="mt-2.5">
+                    <span className="text-[9px] font-mono text-zinc-450 dark:text-zinc-500 block mb-1">
+                      또는 미술관 현대 엄선 가이드 템플릿 선택:
                     </span>
                     <div className="grid grid-cols-3 gap-1.5">
                       {STOCK_ART_OPTIONS.map((opt, idx) => {
@@ -380,10 +435,10 @@ export default function AdminDashboard({
                             type="button"
                             key={idx}
                             onClick={() => selectStockArt(opt.url)}
-                            className={`p-1 text-left rounded text-[8px] font-mono uppercase truncate flex items-center space-x-1 border transition-all ${
+                            className={`p-1.5 text-left rounded text-[8px] font-mono uppercase truncate flex items-center space-x-1 border transition-all ${
                               isCurrent 
-                                ? 'bg-indigo-50 border-indigo-400 text-indigo-700' 
-                                : 'bg-neutral-50 border-neutral-200 hover:bg-neutral-100'
+                                ? 'bg-indigo-50/80 border-indigo-400 text-indigo-700 dark:bg-zinc-800 dark:border-indigo-500 dark:text-indigo-300' 
+                                : 'bg-neutral-50/50 border-neutral-200 hover:bg-neutral-100 dark:bg-zinc-850 dark:border-zinc-800 dark:hover:bg-zinc-800'
                             }`}
                           >
                             <ImageIcon className="w-2.5 h-2.5 flex-shrink-0" />
