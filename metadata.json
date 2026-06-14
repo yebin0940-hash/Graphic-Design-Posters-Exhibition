@@ -1,0 +1,6 @@
+{
+  "name": "Graphic Design Posters Exhibition",
+  "description": "An interactive, elegant horizontal-scrolling exhibition hall showcasing modern typography and minimalist graphic design posters.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
